@@ -1,6 +1,48 @@
 # RankerQuery
-## Priority queue based on accesses to a query
-### Useful to caching the most accessed queries
+## Priority Queue Based on Query Access Frequency
+The `RankerQuery` is a custom priority queue designed to manage and rank queries based on their access frequency. This is especially useful in systems like **caching**, where it's important to prioritize the most accessed queries to optimize performance.
 
-# Todo
-## 1 - Since the access to a query inside the Priority Query is log(n), would be better to firrt store in a map incrementing it's counting accesses, then after a stale time push the list of queries to the priorioty queue 
+### Use Case:
+- **Caching the Most Accessed Queries**: In scenarios where frequently accessed queries need to be prioritized, a priority queue can help ensure that the most popular queries are handled first.
+- **Efficient Query Ranking**: As queries are accessed, their ranking can be adjusted dynamically to reflect their popularity.
+
+---
+
+# **Problems Encountered and Potential Solutions**
+
+## Problem 1: **Inefficient Access to Queries in a Priority Queue**
+In the current implementation, queries are stored in a priority queue, and accessing them is an O(log n) operation. However, querying for the most accessed item might not always be efficient enough if queries are updated frequently.
+
+### Proposed Solution:
+- **Optimized Access with a Map**: Instead of directly modifying the priority queue after every access, you can maintain a **map** that stores the count of accesses. After a certain **stale time**, you can push the list of queries from the map into the priority queue.
+    - **Why this is better**: This solution would reduce the need to adjust the heap on every query access, as you increment counts in constant time (`O(1)`) within the map, and only push updates to the priority queue in batches.
+    - **Implementation Idea**:
+      1. Use a map to track query access counts.
+      2. After a defined period of time (stale time), push the queries from the map into the priority queue.
+
+---
+
+# **Steps to Improve Performance**
+
+### 1. Use a Map to Track Query Access Frequency
+Instead of immediately modifying the heap when a query is accessed, we can store queries in a map where the key is the query string and the value is the access count.
+
+- **Map Structure**:
+    ```go
+    queryMap := make(map[string]int)
+    queryMap[query]++  // Increment the count on every access
+    ```
+
+- **Why It Helps**: 
+    - By using a map, you minimize the time complexity to O(1) for accessing and updating the count of each query.
+    - This prevents the overhead of constantly reorganizing the heap.
+
+### 2. Push Queries to the Priority Queue After Stale Time
+Once queries have been accessed a sufficient number of times (or after a certain stale period), you can transfer the data from the map to the priority queue in bulk.
+
+- **Stale Time Handling**:
+    - A timer or cron job could periodically trigger the pushing of queries from the map to the priority queue.
+    - After pushing, you can clear the map to restart the counting process for a new period.
+
+### 3. Priority Queue with Log(n) Access
+Once queries are in the priority queue, accessing the most frequent queries
