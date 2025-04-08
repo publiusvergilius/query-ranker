@@ -1,36 +1,43 @@
 package queryranker
 
-import "container/heap"
-
 type Query struct {
 	Query string
-	Count uint	
+	Count int	
 }
 
-type QueryHeap []Query
-
-/* 
-func (h QueryHeap) Len() int { return len(h) }
-func (h QueryHeap) Less(i, j int) bool { return h[i].Count > h[j].Count }
-func (h QueryHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
-func (h QueryHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
-*/
-
-func (h QueryHeap) Len() int { return 0 }
-func (h QueryHeap) Less(i, j int) bool { return false }
-func (h QueryHeap) Swap(i, j int) { }
-func (h QueryHeap) Pop() any { return nil }
-func (h QueryHeap) Push(x any) { }
-
-
-
-type Ranker struct {
-	queries []Query
+type QueryRanker struct { 
+	queries []*Query
 }
 
-func (r Ranker) Init() {
-
-	heap.Init(QueryHeap{})
+func (qr *QueryRanker) Len() int { 
+	return len(qr.queries)
 }
 
-func (r Ranker) Add(query Query) {}
+func (qr *QueryRanker) Less(i, j int) bool { 
+	return  qr.queries[i].Count > qr.queries[j].Count
+}
+
+func (qr *QueryRanker) Swap(i, j int) {
+	qr.queries[i], qr.queries[j] = qr.queries[j], qr.queries[i]
+}
+
+func (qr *QueryRanker) Pop() any {
+	old := *qr
+	n := len(old.queries)
+	item := old.queries[n-1]
+	qr.queries = old.queries[0 : n-1]
+
+	return item
+}
+
+func (qr *QueryRanker) Push(x any) { 
+	qr.queries = append(qr.queries, x.(*Query))
+}
+
+func (qr *QueryRanker) Increment(query string) {
+	for _, el := range qr.queries {
+		if el.Query == query {
+			el.Count++
+		}
+	}		
+}
